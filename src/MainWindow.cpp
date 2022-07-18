@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
   mainLayout->addWidget(textBrowser_,1,1);
 
   setLayout(mainLayout);
-  setWindowTitle(tr("Connecting buttons to processes.."));
+  setWindowTitle(tr("avatourguide"));
   connect(line_, SIGNAL(textChanged(const QString &)), this, SLOT(onTextEnter(const QString &)));
   connect(list_, SIGNAL(itemSelectionChanged()), this, SLOT(onSelection()));
 }
