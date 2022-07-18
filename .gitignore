@@ -10,3 +10,4 @@ src/avatourguide_autogen
 src/cmake_install.cmake
 src/compile_commands.json
 src/Makefile
+src/.cache
