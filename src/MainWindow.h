@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <string>
+#include <sstream>
 
 #include <QWidget>
 #include <QtWidgets>
