@@ -1,0 +1,11 @@
+scripts/__pycache__/**
+scripts/ao-bin-dumps/
+scripts/data.*
+
+src/.qt
+src/CMakeCache.txt
+src/CMakeFiles
+src/avatourguide
+src/avatourguide_autogen
+src/cmake_install.cmake
+src/compile_commands.json
