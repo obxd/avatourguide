@@ -201,13 +201,12 @@ def write_data_h():
 #ifndef DATA_H
 #define DATA_H
 
-#include <QString>
 #include <iostream>
 #include <vector>
 using std::vector;
 using std::string;
 
-extern vector<QString> desc ;
+extern vector<string> desc ;
 extern vector<string> maps ;
 
 #endif // DATA_H
@@ -231,7 +230,7 @@ def sort_key(string):
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 def write_data_cpp(maps):
-    desc = "vector<QString> desc {"
+    desc = "vector<string> desc {"
     map_names = "vector<string> maps {"
     for i,map in enumerate(maps):
         map_names += '\n'

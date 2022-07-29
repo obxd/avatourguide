@@ -401,7 +401,7 @@ vector<string> maps {
 ,"settun al nusis"
 ,"settun in nusis"
 };
-vector<QString> desc {
+vector<string> desc {
 "<u>Ouyos-Aoeuam <b>T4</b> Royal</u><br><ul><li>Big Blue T4</li><li>Solo Dungeon T6 Keeper</li><li>Node: Small Wood/Fiber T6</li><li>Node: Small Wood/Fiber T5</li><li>Node: Big Fiber/Hide T6</li><li>Node: Small Fiber/Hide T5</li><li>Node: Small Stone/Wood T5</li></ul>"
 ,"<u>Coues-Exakrom <b>T4</b> Royal</u><br><ul><li>Small Blue T4</li><li>Small Blue T4</li><li>Small Green T4</li><li>Big Green T4</li><li>Node: Small Stone/Wood T5</li><li>Node: Small Stone/Wood T6</li><li>Node: Big Stone/Wood T6</li></ul>"
 ,"<u>Puros-Amayam <b>T4</b> Royal</u><br><ul><li>Small Green T4</li><li>Small Green T6</li><li>Small Green T6</li><li>Big Blue T4</li><li>Group Dungeon T4 Keeper</li><li>Group Dungeon T4 Heretic</li><li>Node: Small Fiber/Hide T6</li></ul>"
