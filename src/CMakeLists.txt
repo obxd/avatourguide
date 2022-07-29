@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(avatourguide VERSION 1.0.0 LANGUAGES CXX)
 
-find_package(wxWidgets 3.1.4 REQUIRED)
+find_package(wxWidgets COMPONENTS html core base REQUIRED)
 include(${wxWidgets_USE_FILE})
 
 # Options
