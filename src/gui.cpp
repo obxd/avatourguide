@@ -48,8 +48,9 @@ void MainFrame::createLayout()
   h_sizer->Add(selection, 1, wxEXPAND | wxALL, 10);
   h_sizer->Add(description, 1, wxEXPAND | wxALL, 10);
 
-  this->SetSizerAndFit(v_sizer);
+  this->SetSizer(v_sizer);
   v_sizer->Layout();
+  this->SetSize(wxSize(800,600));
 }
 
 
