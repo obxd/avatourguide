@@ -15,7 +15,6 @@ class LD
 {
 public:
   LD(string s, string t);
-  ~LD();
 
   /* return the Levenshtein distance btween the strings s and t */ 
   const int get_distance();
@@ -32,7 +31,7 @@ public:
 private:
   const string s;
   const string t; 
-  int** d;  
+  std::vector<std::vector<int> > d;  
   bool distance_calculated;
 
 };

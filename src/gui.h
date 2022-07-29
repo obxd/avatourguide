@@ -1,17 +1,15 @@
+#ifndef GUI_H
+#define GUI_H
+
 #include <wx/wx.h>
 #include <wx/wxhtml.h>
 #include <wx/htmllbox.h>
 
-#include "data.h"
-#include "fuzzysearch.h"
-
-#include <vector>
 #include <string>
-#include <sstream>
+
+#include "processingLayer.h"
 
 using std::string;
-using std::vector;
-
 
 
 class MainFrame : public wxFrame {
@@ -34,5 +32,4 @@ class Application : public wxApp {
   bool OnInit() override ;
 };
 
-
-string colorIndexes(string str,vector<int> indexes);
+#endif

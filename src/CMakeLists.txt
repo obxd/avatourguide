@@ -14,14 +14,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_executable(avatourguide 
     data.cpp
     data.h
-    fuzzysearch.cpp
-    fuzzysearch.h
     levenshtein.cpp
     levenshtein.h
+    algorithm.cpp
+    algorithm.h
     gui.cpp
     gui.h
-    match.cpp
-    match.h
+    processingLayer.h
+    processingLayer.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} 

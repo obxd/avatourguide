@@ -1,6 +1,4 @@
-#include "match.h"
-
-namespace Matching{
+#include "algorithm.h"
 
 Match::Match(string source, string target)
 :source{source},target{target},matches{},score{0}
@@ -57,4 +55,20 @@ bool operator<(const Match& lval, const Match& rval)
   return lval.get_score() < rval.get_score();
 }
 
-};
+vector<IndexedMatch> fuzzysearch(string input, vector<string>& itemList, int maxRes){
+
+  priority_queue<IndexedMatch> matches{};
+  for (int i=0; i<itemList.size(); ++i)
+  {
+    matches.push(std::move(IndexedMatch(input, itemList[i], i)));
+  }
+
+  vector<IndexedMatch> res;
+  for(int i=0; i<maxRes; ++i)
+  {
+    res.emplace_back(matches.top());
+    matches.pop();
+  }
+  return res;
+
+}

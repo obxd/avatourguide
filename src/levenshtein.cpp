@@ -7,30 +7,7 @@ LD::LD(string s, string t)
 {
   int n = s.length();
   int m = t.length();
-
-  if(n != 0 && m != 0){
-    // dynamically create an array of pointers of size n + 1
-    d = new int*[n + 1];
-   
-    // dynamically allocate memory of size m + 1 for each row
-    for (int i = 0; i < n + 1; ++i) {
-        d[i] = new int[m + 1];
-    }
-  }
-}
-
-LD::~LD()
-{
-  int n = s.length();
-  int m = t.length();
-  if(n != 0 && m != 0){
-
-    // deallocate memory of d
-    for (int i = 0; i < n + 1; ++i) {
-        delete[] d[i];
-    }
-    delete[] d;
-  }
+  d =  vector<std::vector<int> >(n + 1, std::vector<int>(m + 1));
 }
 
 const int LD::get_distance()

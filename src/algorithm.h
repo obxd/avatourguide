@@ -1,16 +1,19 @@
-#ifndef MATCH_H
-#define MATCH_H
+#ifndef ALGORITHM_H
+#define ALGORITHM_H
 
-#include <vector>
 #include <iostream>
+#include <vector>
+#include <algorithm>
+#include <queue>
+
 #include "levenshtein.h"
+
 using std::string;
 using std::vector;
+using std::priority_queue;
 
-namespace Matching{
 
 class Match{
-
 public:
   Match(string source, string target);
   Match(const Match&) = default;
@@ -29,9 +32,25 @@ private:
   string target;
   vector<int> matches; // on target
   double score;
-
 };
+
+
 bool operator<(const Match& lval, const Match& rval);
 
+
+class IndexedMatch :public Match
+{
+public:
+    IndexedMatch(string source, string target, int i)
+      :index{i},Match{source,target}{};
+
+    int get_index() const {return index;};
+    
+private:
+    int index;
 };
-#endif // MATCH_H
+
+
+vector<IndexedMatch> fuzzysearch(string input, vector<string>& itemList, int maxRes);
+
+#endif
