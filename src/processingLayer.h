@@ -15,7 +15,7 @@ using std::pair;
 using std::stringstream;
 
 
-vector<pair<string, string*> > process(string& input_text);
+pair<vector<string>, vector<void*> > process(string& input_text);
 
 
 string colorIndexes(string str,vector<int> indexes);

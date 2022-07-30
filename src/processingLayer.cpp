@@ -1,9 +1,9 @@
 #include "processingLayer.h"
 
 
-vector<pair<string, string*>>process(string& input_text)
+pair<vector<string>, vector<void*> >process(string& input_text)
 {
-  vector<pair<string, string*> > resoult;
+  pair<vector<string>, vector<void*> > resoult;
 
   if(input_text.length() >= 2) // strat searching after 2 chars
   {
@@ -12,7 +12,8 @@ vector<pair<string, string*>>process(string& input_text)
     {
       string s = colorIndexes(match.get_target(), match.get_matches());
       string& d = desc[match.get_index()];
-      resoult.emplace_back(std::make_pair(s,&d));
+      resoult.first.emplace_back(s);
+      resoult.second.emplace_back(static_cast<void*>(&d));
     }
   }
 

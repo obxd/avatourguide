@@ -1,5 +1,6 @@
 #include "gui.h"
 
+
 wxIMPLEMENT_APP(Application);
 
 
@@ -63,8 +64,14 @@ void MainFrame::createBehavior()
       selection->Clear();
       string text = input->GetValue().ToStdString();
 
-      for (auto& [name,data]: process(text))
-        selection->Append(name, (void *)data);
+      auto res = process(text);
+
+      wxArrayString mnames{};
+      for (auto& name : res.first)
+        mnames.Add(wxString{name});
+
+      selection->Append(mnames, std::data(res.second));
+
 
       if(!selection->IsEmpty())
         selection->SetSelection(0);
