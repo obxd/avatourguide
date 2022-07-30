@@ -5,7 +5,7 @@ pair<vector<string>, vector<void*> >process(string& input_text)
 {
   pair<vector<string>, vector<void*> > resoult;
 
-  if(input_text.length() >= 2) // strat searching after 2 chars
+  if(input_text.length() >= 2 && input_text.length() < 50) // strat searching after 2 chars and less than 50
   {
     auto res = fuzzysearch(input_text, maps, 20);
     for (auto match: res)
