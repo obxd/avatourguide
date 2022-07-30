@@ -39,15 +39,15 @@ void MainFrame::createLayout()
   v_sizer= new wxBoxSizer(wxVERTICAL);
 
   // add input to the top
-  v_sizer->Add(input, 0, wxEXPAND | wxALL, 10);
+  v_sizer->Add(input, 0, wxEXPAND | wxALL, 5);
 
   // add horizonatl sizer to the bottom
   h_sizer = new wxBoxSizer(wxHORIZONTAL);
-  v_sizer->Add(h_sizer, 1, wxEXPAND | wxALL, 10);
+  v_sizer->Add(h_sizer, 1, wxEXPAND | wxALL, 5);
 
   // add selection list and description to horizonatl sizer
-  h_sizer->Add(selection, 1, wxEXPAND | wxALL, 10);
-  h_sizer->Add(description, 1, wxEXPAND | wxALL, 10);
+  h_sizer->Add(selection, 1, wxEXPAND | wxALL, 5);
+  h_sizer->Add(description, 1, wxEXPAND | wxALL, 5);
 
   this->SetSizer(v_sizer);
   v_sizer->Layout();
