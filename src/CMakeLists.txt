@@ -13,13 +13,12 @@ find_package(wxWidgets COMPONENTS html core base REQUIRED)
 include(${wxWidgets_USE_FILE})
 
 # Options
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Target
 add_executable(avatourguide 
-    data.cpp
     data.h
     levenshtein.cpp
     levenshtein.h

@@ -2,7 +2,7 @@
 
 namespace LevenshteinDistance{
 
-LD::LD(string s, string t)
+LD::LD(string_view s, string_view t)
 :s{s}, t{t}, distance_calculated{false}
 {
   int n = s.length();
@@ -61,8 +61,9 @@ const double LD::get_ratio()
 }
 
 
-void LD::get_target_matches(vector<int>& matches)
+vector<int> LD::get_target_matches()
 {
+  vector<int> matches;
   if(!distance_calculated) get_distance();
 
   int n = s.length();
@@ -98,6 +99,7 @@ void LD::get_target_matches(vector<int>& matches)
         throw std::runtime_error("bad d matrix");
     }
   }
+  return matches;
 }
 
 };

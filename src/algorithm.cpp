@@ -1,73 +1,44 @@
 #include "algorithm.h"
 
-Match::Match(string source, string target)
-:source{source},target{target},matches{},score{0}
+vector<tuple< string, string, vector<int>>> fuzzysearch (const string_view input, const int maxRes)
 {
-  LevenshteinDistance::LD ld{source,target};
-  score = ld.get_ratio();
-  ld.get_target_matches(matches);
-}
+  constexpr auto cmp{[](
+        tuple <const MapData*, double, vector<int> >& a,
+        tuple <const MapData*, double, vector<int> >& b ) {
+    return get<1>(a) < get<1>(b);
+  }};
 
-Match& Match::operator=(const Match& other) 
-{
-    matches = other.matches;
-    score = other.score;
-    source = other.source;
-    target = other.target;
-    return *this;
-}
+  priority_queue<
+      tuple <const MapData*, double ,vector<int>>,
+      vector <tuple <const MapData*, double ,vector<int>>>,
+      decltype(cmp)
+    > pq {cmp};
 
-Match& Match::operator=(Match&& other)
-{
-    score   = other.score;
-    source  = other.source;
-    target  = other.target;
-    matches = std::move(other.matches);
-
-    other.score = 0;
-    other.source = "";
-    other.target = "";
-    return *this;
-}
-
-const string Match::get_source() const
-{
-  return source;
-}
-
-const string Match::get_target() const
-{
-  return target;
-}
-
-const vector<int> Match::get_matches() const
-{
-  return matches;
-}
-
-const double Match::get_score() const
-{
- return score;
-}
-
-bool operator<(const Match& lval, const Match& rval)
-{
-  return lval.get_score() < rval.get_score();
-}
-
-vector<IndexedMatch> fuzzysearch(string input, vector<string>& itemList, int maxRes){
-
-  priority_queue<IndexedMatch> matches{};
-  for (int i=0; i<itemList.size(); ++i)
+  for(auto & item: Data)
   {
-    matches.push(std::move(IndexedMatch(input, itemList[i], i)));
+    auto ld = LevenshteinDistance::LD(input, item.name);
+    double ratio = ld.get_ratio();
+    vector<int> matches = ld.get_target_matches();
+
+    tuple <
+      const MapData*,
+      double,
+      vector<int>
+    > itemScoreMatchs = std::make_tuple(&item , ratio, matches);
+
+    pq.push(itemScoreMatchs);
   }
 
-  vector<IndexedMatch> res;
+
+  vector<tuple<string, string, vector<int>>> res;
   for(int i=0; i<maxRes; ++i)
   {
-    res.emplace_back(matches.top());
-    matches.pop();
+    auto& item = pq.top();
+    auto name = get<0>(item)->name;
+    auto desc = get<0>(item)->description;
+    auto matches = get<2>(item);
+    res.emplace_back(std::make_tuple(name, desc, matches));
+    pq.pop();
   }
   return res;
 

@@ -6,257 +6,323 @@ this script generate data.h and data.cpp
 with maps name and description.
 """
 
+from typing import List, Set, Dict, Union
 import xml.etree.ElementTree as ET
 import re
 import sys
 
-ava_type_lexicon = {
- "TUNNEL_BLACK_LOW"    : "L1 Outer"
-,"TUNNEL_LOW"          : "L2 Outer"
-,"TUNNEL_BLACK_HIGH"   : "L1 Inner"
-,"TUNNEL_HIGH"         : "L2 Inner"
-,"TUNNEL_BLACK_MEDIUM" : "L1 Middle"
-,"TUNNEL_MEDIUM"       : "L2 Middle"
-,"TUNNEL_DEEP"         : "Deep"
-,"TUNNEL_ROYAL"        : "Royal"
-,"TUNNEL_HIDEOUT"      : "Rest"
-,"TUNNEL_HIDEOUT_DEEP" : "Deep Rest"
+RoadTypes :Set[str] = { "TUNNEL_BLACK_LOW" ,"TUNNEL_LOW"          ,"TUNNEL_BLACK_HIGH"
+                        ,"TUNNEL_HIGH"     ,"TUNNEL_BLACK_MEDIUM" ,"TUNNEL_MEDIUM"
+                        ,"TUNNEL_DEEP"     ,"TUNNEL_ROYAL"        ,"TUNNEL_HIDEOUT"
+                        ,"TUNNEL_HIDEOUT_DEEP"
 }
 
-chest_color = {
-     "Solo" :"Green"
-    ,"Group":"Blue"
-    ,"Raid" :"Gold"
-}
+def isRoadType(mapType :str) -> bool:
+    if mapType in RoadTypes:
+        return True
+    return False
 
-dungeon_type = {
-     "HER" : "Heretic"
-    ,"KPR" : "Keeper"
-    ,"MOR" : "Morgana"
-    ,"UND" : "Undead"
-}
-
-resource_type = {
-     "Solo"  : "Small"
-    ,"Group" : "Big"
-    ,"Raid"  : "Big Raid"
-}
-
-
-templates={
-    # PVE
+Templates :Set[str] = {
     # small chests
-     "S_FR_ROAD_PVE_Encounter_01"     :"Small"
-    ,"S_FR_ROAD_PVE_Encounter_02"     :"Small"
+     "S_FR_ROAD_PVE_Encounter_01" ,"S_FR_ROAD_PVE_Encounter_02"
     # big chests
-    ,"M_FR_ROAD_PVE_SOLO_01"          :"Big Green"
-    ,"M_FR_ROAD_PVE_GROUP_01"         :"Big Blue"
-    ,"M_FR_ROAD_PVE_RAID_01"          :"Big Gold"
+    ,"M_FR_ROAD_PVE_SOLO_01" ,"M_FR_ROAD_PVE_GROUP_01" ,"M_FR_ROAD_PVE_RAID_01"
     # dungeons 
-    ,"S_FR_ROAD_DNG_SOLO_Entrance_01" :"Solo"
-    ,"S_FR_ROAD_DNG_GROUP_Entrance_01":"Group"
-    ,"S_FR_ROAD_DNG_RAID_Entrance_01" :"AVA"
+    ,"S_FR_ROAD_DNG_SOLO_Entrance_01" ,"S_FR_ROAD_DNG_GROUP_Entrance_01" ,"S_FR_ROAD_DNG_RAID_Entrance_01"
     # Guthering stuff
-    ,"S_FR_ROAD_RES_Cave_01"          :"Node"
-    ,"S_FR_ROAD_RES_Clearing_01"      :"Node"
-    ,"S_FR_ROAD_RES_MountainSide_01"  :"Node"
-    ,"M_FR_ROAD_RES_Cave_01"          :"Node"
-    ,"M_FR_ROAD_RES_Clearing_01"      :"Node"
+    ,"S_FR_ROAD_RES_Cave_01" ,"S_FR_ROAD_RES_Clearing_01" ,"S_FR_ROAD_RES_MountainSide_01" ,"M_FR_ROAD_RES_Cave_01" ,"M_FR_ROAD_RES_Clearing_01"
 }
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-CACHE = dict()
-def cache_or_get_from_cache(path):
-    if path not in CACHE.keys():
-        CACHE[path] = ET.parse(path)
-    return CACHE[path]
-
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def get_tier_from_string(string):
-    matches = re.search(r"T[4-8]", string)
-    if matches:
-        return matches.group(0)
-    else:
-        print(f"Unable to get tier from str:'{string}'",file=sys.stderr)
-        exit(1)
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def ger_resource_tier_from_string(string):
+def GetTierFromString(string :str) -> int:
+    """ Return int [4,...,8] from the string where the number is the last
+        for example :
+        string = "T5/6/7/8" -> 8 :int
+        raising  runtime error if not found
+    """
     matches = re.search(r"T([4-8]|/)+", string)
     if matches:
-        return "T" + matches.group(0)[-1]
+        return int(matches.group(0)[-1])
     else:
-        print(f"Unable to get tier from str:'{string}'",file=sys.stderr)
-        exit(1)
+        raise RuntimeError(f"Unable to get tier from str:'{string}'")
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+class AttNotFoundExeption(Exception):
+    # Exeption to be rised
+    pass 
 
-def format_description(tag, parentname, childname):
-    if "Big" in tag:
-        return  tag + " " +  get_tier_from_string(childname)
+def GetAttValue(element :ET.Element, attrib_name) -> str:
+    """ Gets Att value and raise AttNotFoundExeption if value not exist. """
+    value :Union[str, None] = element.attrib.get(attrib_name)
+    if value == None: 
+        raise AttNotFoundExeption(f"unable to find {attrib_name}")
+    return value
 
-    elif "Small" ==  tag:
-        return tag + " " + chest_color[parentname.split(" ")[0]] + " " + get_tier_from_string(childname)
+def GetDisplayname(element :ET.Element) -> str:
+    return GetAttValue(element,'displayname')
 
-    elif tag in ("Solo","Group"):
-        return tag + " Dungeon "+ get_tier_from_string(childname) + " " + dungeon_type[childname[-3:]]
+def GetFilename(element :ET.Element) -> str:
+    return GetAttValue(element,'file')
 
-    elif tag == 'AVA':
-        return tag +" " + get_tier_from_string(childname)
+def GetMapType(element :ET.Element) -> str:
+    return GetAttValue(element,'type')
 
+def GetRef(element :ET.Element) -> str:
+    return GetAttValue(element,'ref')
+
+class Component:
+    """
+    Maps component, includes the data about the component thier type, size and tier
+    this infromation is deduced from ref filename ,parent element name and child element name from ref file by __init__ function
+    """
+    def __init__(self, refFile :str, parentElName :str, childElName :str):
+        self.tier = GetTierFromString(childElName)
+
+        # Small Chests
+        if refFile in ( "S_FR_ROAD_PVE_Encounter_01" ,"S_FR_ROAD_PVE_Encounter_02"):
+            color = ""
+            if "Solo" in parentElName:
+                color = "Green"
+            elif "Group" in parentElName:
+                color = "Blue"
+            elif "Raid" in parentElName:
+                color = "Gold"
+            self.type = color + " Chest"
+            self.size = "Small"
+
+        # Big Chests
+        elif refFile in ("M_FR_ROAD_PVE_SOLO_01" ,"M_FR_ROAD_PVE_GROUP_01" ,"M_FR_ROAD_PVE_RAID_01"):
+            color = ""
+            if "SOLO" in refFile:
+                color = "Green"
+            elif "GROUP" in refFile:
+                color = "Blue"
+            elif "RAID" in refFile:
+                color = "Gold"
+            self.type = color + " Chest"
+            self.size = "Big"
+
+        # Solo/Group/AVA dungeon
+        elif refFile in ( "S_FR_ROAD_DNG_SOLO_Entrance_01" ,"S_FR_ROAD_DNG_GROUP_Entrance_01" ,"S_FR_ROAD_DNG_RAID_Entrance_01"):
+            self.type = "Dungeon"
+            matches = re.search(r"SOLO|GROUP|RAID", refFile)
+            if matches:
+                self.size = matches.group(0).title()
+
+        # Guthering stuff
+        elif refFile in ( "S_FR_ROAD_RES_Cave_01" ,"S_FR_ROAD_RES_Clearing_01" ,"S_FR_ROAD_RES_MountainSide_01" ,"M_FR_ROAD_RES_Cave_01" ,"M_FR_ROAD_RES_Clearing_01"):
+            self.type = childElName.split(" ")[0]
+            self.size = parentElName
+
+class Data:
+    """
+    Holding map data: name of the map, tier, type and components from this map
+    """
+    def __init__(self, name, tier, type, components):
+        self.name = name
+        self.tier = tier
+        self.type = {    "TUNNEL_BLACK_LOW"    : "L1 Outer"
+                        ,"TUNNEL_LOW"          : "L2 Outer"
+                        ,"TUNNEL_BLACK_HIGH"   : "L1 Inner"
+                        ,"TUNNEL_HIGH"         : "L2 Inner"
+                        ,"TUNNEL_BLACK_MEDIUM" : "L1 Middle"
+                        ,"TUNNEL_MEDIUM"       : "L2 Middle"
+                        ,"TUNNEL_DEEP"         : "Deep"
+                        ,"TUNNEL_ROYAL"        : "Royal"
+                        ,"TUNNEL_HIDEOUT"      : "Rest"
+                        ,"TUNNEL_HIDEOUT_DEEP" : "Deep Rest"
+                    }[type]
+        self.components = components
+
+
+class ComponentFactory():
+    """
+    Factory creating components.
+    Extracting the data needed for component creation from maps cluser xml
+    that refers to templates xml with layers
+    """
+    def __init__(self, ao_bin_dumps_path :str):
+        self.base_path = ao_bin_dumps_path 
+        self.CachedFiles :Dict[str, ET.ElementTree] = dict()
+
+
+    def cache_or_get_from_cache(self, path) -> ET.ElementTree:
+        if path not in self.CachedFiles.keys():
+            self.CachedFiles[path] = ET.parse(path)
+        return self.CachedFiles[path]
+
+
+    def createComponents(self, filename :str) -> List[Component]:
+        clusterET = self.cache_or_get_from_cache(self.base_path + "/cluster/" + filename)
+        root = clusterET.getroot()
+
+        components = list()
+        for template in root.findall('.//templateinstance'):
+            if template.attrib.get("ref") in Templates:
+
+                active_layers = [ x.attrib.get("id") for x in template.findall("activelayer") ]
+                reffilename = GetRef(template)
+                path = self.base_path + "/templates/NONE/" + reffilename + ".template.xml"
+                refET = self.cache_or_get_from_cache(path)
+
+                parentEL = None
+                childEL = None
+                for layer in active_layers: 
+                    parentEL = refET.find(f"./tiles/*/layer[@id='{layer}']/..")
+                    childEL = parentEL.find(f"./layer[@id='{layer}']")
+                    if childEL != None and parentEL != None and parentEL.attrib.get("name") != "Layout":
+                        break
+
+                if parentEL == None or childEL == None:
+                    raise RuntimeError("unable to find non layout layer")
+
+                pname = GetAttValue(parentEL, "name")
+                cname = GetAttValue(childEL, "name")
+                components.append(Component(reffilename,pname,cname)) 
+
+        return components
+
+
+class DataFactory():
+    """
+    Factory for creating data for roads maps
+    """
+    def __init__(self, ao_bin_dumps_path :str):
+        # Geting all roads elements from world.xml
+        self.base_path = ao_bin_dumps_path 
+        worldRoot = ET.parse(self.base_path + "/cluster/world.xml").getroot()
+        self.ava_maps :List[ET.Element] = list()
+        for cluster in worldRoot.findall('.//clusters/cluster'):
+            try:
+                typeAtt = GetMapType(cluster)
+                if(isRoadType(typeAtt)):
+                    self.ava_maps.append(cluster)
+            except AttNotFoundExeption:
+                continue
+        # Creating ElementFactory
+        self.componentFactory = ComponentFactory(ao_bin_dumps_path)
+
+
+    def CreateMapData(self, mapCluster :ET.Element) -> Data:
+        name     :str = GetDisplayname(mapCluster)
+        filename :str = GetFilename(mapCluster)
+        tier     :int = GetTierFromString(filename)
+        typeAtt  :str = GetMapType(mapCluster)
+        components = self.componentFactory.createComponents(filename)
+        return Data(name, tier, typeAtt, components)
+
+
+    def CreateAllMapData(self) -> List[Data]:
+        maps = list()
+        for map in self.ava_maps:
+            maps.append(self.CreateMapData(map))
+        return maps
+
+
+def sort_key(component :Component) -> int:
+    score = 0
+    if "Chest" in component.type:
+        # small chests first
+        if "Small" == component.size:
+            score += 100
+        # big chests after small chests
+        if "Big" == component.size:
+            score += 200
+    # dungeon after chests
+    elif "Dungeon" == component.type:
+        score += 300
+    # gathering stuff at the end
     else:
-        return tag + ": " + resource_type[parentname] +  " " + childname.split(" ")[0] + " " + ger_resource_tier_from_string(childname)
-
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def get_ava_clusters_elements():
-    worldTree = ET.parse("./ao-bin-dumps/cluster/world.xml")
-    worldRoot = worldTree.getroot()
-
-    ava_clusters = list()
-    for cluster in worldRoot.findall('.//clusters/cluster'):
-        clusterType = cluster.attrib.get('type')
-        if clusterType in ava_type_lexicon.keys():
-            ava_clusters.append(cluster)
-
-    # make sure we get all 400 maps
-    assert len(set([x.attrib.get('displayname') for x in ava_clusters])) == 400
-    return ava_clusters
-
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def find_non_layout_elem(elem:ET.ElementTree , layers):
-    for layer in layers: 
-        parentEl = elem.find(f"./tiles/*/layer[@id='{layer}']/..")
-        if parentEl == None:
-            print(f"unable to find layer in element",file=sys.stderr)
-            exit(1)
-        elif parentEl.attrib.get("name") != "Layout":
-            return  parentEl,layer
-
-    print(f"unable to find non layout layer",file=sys.stderr)
-    exit(1)
-
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def get_parent_child_names(elem, layer):
-    parent = elem.attrib.get("name")
-    el = elem.find(f"./layer[@id='{layer}']")
-    if el == None:
-        print(f"unable to find layer in element",file=sys.stderr)
-        exit(1)
-    child = el.attrib.get("name")
-    return parent, child
-
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def get_templates_description_map(filename,layers):
-    tag = templates[filename]
-    path = "ao-bin-dumps/templates/NONE/" + filename + ".template.xml"
-    elemTree = cache_or_get_from_cache(path)
-    elm,layer = find_non_layout_elem(elemTree, layers)
-    parent, child = get_parent_child_names(elm, layer)
-    return format_description(tag, parent, child)
-
-
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-
-def get_claster_data(cluster :ET.Element):
-    name = cluster.attrib.get('displayname')
-    filename = cluster.attrib.get('file')
-    tier = get_tier_from_string(filename)
-    type = ava_type_lexicon[cluster.attrib.get("type")]
-    cluster_et = cache_or_get_from_cache("./ao-bin-dumps/cluster/" + filename)
-    cluster_root = cluster_et.getroot()
-
-    items = list()
-    for template in cluster_root.findall('.//templateinstance'):
-        if template.attrib.get("ref") in templates.keys():
-            active_layers = [ x.attrib.get("id") for x in template.findall("activelayer") ]
-            filename = template.attrib.get("ref")
-            items.append(get_templates_description_map(filename,active_layers)) 
-
-    return {
-        "name"   :name
-        ,"tier"  :tier
-        ,"type"  :type
-        ,"items" :items
-    }
+        score += 400
         
+    # for chests
+    # green < blue < gold
+    if "Green" in component.type:
+        score += 10
+    elif "Blue" in component.type:
+        score += 20
+    elif "Gold" in component.type:
+        score += 30
+    # for dungeons and nodes 
+    # sort by size
+    elif "Solo" == component.size:
+        score += 10
+    elif "Group" == component.size:
+        score += 20
+    elif "Raid" == component.size:
+        score += 30
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # and at last sort by tier
+    score += component.tier
+    return score
 
-def write_data_h():
-    with open("data.h",'w') as file:
-        file.write("""
+def color_for_component(component: Component):
+    if "Green" in component.type:
+        return "#affa1f"
+    elif "Blue" in component.type:
+        return "#0d8cff"
+    elif "Gold" in component.type:
+        return "#f2f50f"
+    elif "Dungeon" in component.type:
+        if "Solo" == component.size:
+            return "#affa1f"
+        elif "Group" == component.size:
+            return "#0d8cff"
+        elif "Raid" == component.size:
+            return "#f2f50f"
+    return None
+
+
+def write_data_h(data :List[Data]):
+    head = """\
 #ifndef DATA_H
 #define DATA_H
 
-#include <iostream>
-#include <vector>
-using std::vector;
-using std::string;
+#include <string>
+#include <array>
 
-extern vector<string> desc ;
-extern vector<string> maps ;
+using std::array;
+using std::string_view;
 
-#endif // DATA_H
-""")
+struct MapData{
+    const string_view name;
+    const string_view description;
+    constexpr MapData(string_view name, string_view description) :name{name},description{description}{};
+};
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+"""
+    footer ="#endif // DATA_H\n"
 
-def sort_key(string):
-    tag  = string.split(" ")[0].replace(":","")
-    tag_order ={
-         "Small" : 1
-        ,"Big"   : 2
-        ,"Solo"  : 3
-        ,"Group" : 4
-        ,"AVA"   : 5
-        ,"Node"  : 6 }
-    return tag_order[tag]
+    body = f"inline static constexpr auto numOfMaps = {len(data)};\n"
+    body += f"inline static constexpr array<MapData, numOfMaps> Data " + '{'
 
-        
+    for i, map in enumerate(data):
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        body +="\n"
 
-def write_data_cpp(maps):
-    desc = "vector<string> desc {"
-    map_names = "vector<string> maps {"
-    for i,map in enumerate(maps):
-        map_names += '\n'
-        desc += '\n'
-        if i>0: 
-            map_names += ','
-            desc += ','
-        map_names += '"' +  map["name"].lower().replace("-"," ") + '"'
-        desc += '"'
-        desc += f"<u>{map['name']} <b>{map['tier']}</b> {map['type']}</u><br>"
-        desc += "<ul>"
-        for item in sorted(map['items'], key=sort_key):
-            desc +="<li>" + item + "</li>" 
-        desc += "</ul>"
-        desc += '"'
-            
-    desc += '\n};'
-    map_names += '\n};'
+        if i > 0: 
+            body += ','
 
-    with open("data.cpp",'w') as file:
-        file.write('#include "data.h"' + '\n' +map_names + '\n' + desc + '\n')
+        body += 'MapData{"' +  map.name.lower().replace("-", " ") + '",'
 
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        body += '"' +  map.name \
+             + '<table border=\\"1\\"><tr><th>Type</th><th>Size</th><th>Tier</th></tr>'
+
+        components = sorted(map.components, key=sort_key)
+        for c in components:
+            color = color_for_component(c)
+            if color:
+                body += f"<tr bgcolor=\\\"{color}\\\">"
+            else:
+                body += "<tr>"
+            body += f"<td>{c.type}</td><td>{c.size}</td><td>{c.tier}</td></tr>"
+
+        body += "</table>" + '"}'
+
+    body += '\n};\n'
+
+    with open("data.h",'w') as file:
+        file.write(head + body + footer)
 
 if __name__ == "__main__":
-    clusters = get_ava_clusters_elements()
-    maps = list(map(get_claster_data, clusters))
-    write_data_h()
-    write_data_cpp(maps)
+    DF = DataFactory("./ao-bin-dumps")
+    data = DF.CreateAllMapData()
+    write_data_h(data)

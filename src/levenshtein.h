@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <vector>
 
-using std::string;
+using std::string_view;
 using std::min;
 using std::vector;
 
@@ -14,7 +14,7 @@ namespace LevenshteinDistance{
 class LD
 {
 public:
-  LD(string s, string t);
+  LD(string_view s, string_view t);
 
   /* return the Levenshtein distance btween the strings s and t */ 
   const int get_distance();
@@ -26,11 +26,11 @@ public:
   /* Reconstructing the edits of the input strings, storing indexes of t where there is 
    * a matches of chars from s to t
    * storing into matches vector */
-  void get_target_matches(vector<int>& matches);
+  vector<int> get_target_matches();
 
 private:
-  const string s;
-  const string t; 
+  const string_view s;
+  const string_view t; 
   std::vector<std::vector<int> > d;  
   bool distance_calculated;
 

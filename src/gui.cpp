@@ -11,7 +11,7 @@ bool Application::OnInit() {
 }
 
 
-MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "avatourguide")
+MainFrame::MainFrame() : wxFrame(nullptr, wxID_ANY, "avatourguide"), mnames{}, mdesc{}
 {
   createComponents();
   createLayout();
@@ -66,11 +66,17 @@ void MainFrame::createBehavior()
 
       auto res = process(text);
 
-      wxArrayString mnames{};
-      for (auto& name : res.first)
-        mnames.Add(wxString{name});
+      mnames.clear();
+      mdesc.clear();
 
-      selection->Append(mnames, std::data(res.second));
+      mnames = res.first;
+      mdesc = res.second;
+
+      vector<void*> data;
+      for(string& s: mdesc)
+          data.push_back(static_cast<void*>(&s));
+
+      selection->Append(mnames, std::data(data));
 
 
       if(!selection->IsEmpty())

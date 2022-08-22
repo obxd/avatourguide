@@ -16,11 +16,14 @@ class MainFrame : public wxFrame {
 public:
   MainFrame();
 private:
+  wxArrayString mnames;
+  vector<string> mdesc;
+
   wxBoxSizer* v_sizer;
   wxBoxSizer* h_sizer;
 
   wxTextCtrl* input;
-  wxSimpleHtmlListBox*  selection;
+  wxSimpleHtmlListBox* selection;
   wxHtmlWindow* description;
 
   void createComponents();
