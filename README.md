@@ -1,10 +1,13 @@
 # avatourguide
 Albion online avalonian road maps info  
 
+![Screenshot](screenshot.png)
+
+**Windows**
+
+Build from source or get the executable from [releases](https://github.com/obxd/avatourguide/releases)
 
 **GNU/Linux**
-
-![Screenshot](screenshot.png)
 
 Build from source:
 - make sure build essential, wxwidgets and cmake are installed
@@ -13,9 +16,3 @@ Build from source:
 - `cmake .`
 - `make`
 
-
-**Windows**
-
-![Screenshot2](screenshot2.png)
-
-Build from source or get the executable from [releases](https://github.com/obxd/avatourguide/releases)
